@@ -12,6 +12,8 @@ Count the number of experience points for EPITECH's Hub module (for students).
 2. Workshops (organization or participation)
 3. Hackthons (organization or participation)
 
+This programme doesn't count Hub projects and experimentations
+
 ## How to use
 1. Clone this repository
 2. Navigate in the repository
