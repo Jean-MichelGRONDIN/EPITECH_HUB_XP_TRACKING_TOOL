@@ -7,7 +7,7 @@ Count the number of experience points for EPITECH's Hub module (for students).
 - The number of time you can still participate in talks or workshops or hackathons before reaching the limit
 - The number of time you can still organize talks or workshops or hackathons before reaching the limit (if limit is 9999 for hackathons = unlimited, it won't display anything for hackathons)
 
-## What is taked into account
+## What is the result based on
 1. Hub Talks (organization or participation)
 2. Workshops (organization or participation)
 3. Hackthons (organization or participation)
