@@ -1,0 +1,11 @@
+#!/usr/bin/php
+<?php
+
+include './XpscounterClass.php';
+
+$counter = new Xpscounter("./conf.json");
+$counter->setupAll();
+$counter->countMyXps();
+$counter->printAll();
+
+?>
