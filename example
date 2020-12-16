@@ -6,6 +6,10 @@ include './XpscounterClass.php';
 $counter = new Xpscounter("./conf.json");
 $counter->setupAll();
 $counter->countMyXps();
-$counter->printAll();
+if ($argc == 2 && $argv[1] == "--details") {
+    $counter->printAll();
+} else {
+    $counter->print();
+}
 
 ?>

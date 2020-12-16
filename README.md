@@ -28,3 +28,4 @@ This programme doesn't take in account Hub projects and experimentations.
 (For example if my autologin is 'https://intra.epitech.eu/auth-6526' you need to copy 'auth-6526')
 7. Past your what you have copied in the previously created file 'autologin' (on a single line, without new line at the end)
 8. Run ./example at the root of the repository
+(With the exmaple you can also use the argument '--details' for more details on your hub module)

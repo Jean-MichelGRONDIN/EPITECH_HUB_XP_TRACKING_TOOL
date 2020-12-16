@@ -44,6 +44,10 @@ class Xpscounter
 
     private $user_login;
     private $autologin_file_path;
+    private $participation_attended;
+    private $organization_attended;
+    private $participation_missing;
+    private $organization_missing;
     private $year;
     // private $user_auto_login;
 
@@ -93,6 +97,12 @@ class Xpscounter
         $this->user_login = $this->config['EMAIL'];
         $this->autologin_file_path = $this->config['AUTOLOGIN_FILE_PATH'];
         $this->year = $this->config['YEAR'];
+
+        $this->participation_attended = [];
+        $this->participation_missing = [];
+
+        $this->organization_attended = [];
+        $this->organization_missing = [];
         // $this->user_auto_login = $autologin;
     }
 
@@ -101,7 +111,7 @@ class Xpscounter
         $this->xps = $this->nb_xps_won - $this->nb_xps_lost;
     }
 
-    public function participationAddOrSub($activity_type, $presence_status)
+    public function participationAddOrSub($activity_type, $presence_status, $title)
     {
         $tmp_value = 0;
 
@@ -117,6 +127,7 @@ class Xpscounter
                 $this->hackaton_participation_myNb += 1;
             }
             $this->nb_xps_won += $tmp_value;
+            array_push($this->participation_attended, "[". $activity_type ."] ". $title);
         } else {
             if ($activity_type == "Talk") {
                 $tmp_value = $this->talk_participation_sub;
@@ -126,10 +137,11 @@ class Xpscounter
                 $tmp_value = $this->hackaton_participation_sub;
             }
             $this->nb_xps_lost += $tmp_value;
+            array_push($this->participation_missing, "[". $activity_type ."] ". $title);
         }
     }
 
-    public function organizationAddOrSub($activity_type, $presence_status)
+    public function organizationAddOrSub($activity_type, $presence_status, $title)
     {
         $tmp_value = 0;
 
@@ -144,6 +156,7 @@ class Xpscounter
                 $tmp_value = $this->hackaton_organisation_add;
                 $this->hackaton_organisation_myNb += 1;
             }
+            array_push($this->organization_attended, "[". $activity_type ."] ". $title);
             $this->nb_xps_won += $tmp_value;
         } else {
             if ($activity_type == "Talk") {
@@ -153,26 +166,27 @@ class Xpscounter
             } else if ($activity_type == "Hackathon") {
                 $tmp_value = $this->hackaton_organisation_sub;
             }
+            array_push($this->organization_missing, "[". $activity_type ."] ". $title);
             $this->nb_xps_lost += $tmp_value;
         }
     }
 
-    public function experimentationAddOrSub()
-    {
-        $this->nb_xps_won += $this->experimentation_add;
-    }
+    // public function experimentationAddOrSub()
+    // {
+    //     $this->nb_xps_won += $this->experimentation_add;
+    // }
 
-    public function xpsAddOrSub($activity_type, $presence_status)
+    public function xpsAddOrSub($activity_type, $presence_status, $title)
     {
         if ($presence_status == 1 || $presence_status == -1) {
-            $this->participationAddOrSub($activity_type, $presence_status);
+            $this->participationAddOrSub($activity_type, $presence_status, $title);
         }
         if ($presence_status == 2 || $presence_status == -2) {
-            $this->organizationAddOrSub($activity_type, $presence_status);
+            $this->organizationAddOrSub($activity_type, $presence_status, $title);
         }
-        if ($presence_status == 3) {
-            $this->experimentationAddOrSub();
-        }
+        // if ($presence_status == 3) {
+        //     $this->experimentationAddOrSub();
+        // }
     }
 
     public function getuserStatusParticipation($event, $presence_status)
@@ -250,6 +264,7 @@ class Xpscounter
     {
         $activities = $this->data['activites'];
         foreach ($activities as $act) {
+            $title = $act['title'];
             $act_type = $act['type_title'];
             $events = $act['events'];
             $presence_status = 0;
@@ -261,13 +276,13 @@ class Xpscounter
             }
             // }
             if ($presence_status != 0) {
-                $this->xpsAddOrSub($act_type, $presence_status);
+                $this->xpsAddOrSub($act_type, $presence_status, $title);
             }
         }
         $this->calcStats();
     }
 
-    public function printAll()
+    public function print()
     {
         $parti_talks_left = $this->talk_participation_limit - $this->talk_participation_myNb;
         $parti_workshops_left = $this->workshop_participation_limit - $this->workshop_participation_myNb;
@@ -275,6 +290,7 @@ class Xpscounter
         $orga_talks_left = $this->talk_organisation_limit - $this->talk_organisation_myNb;
         $orga_workshops_left = $this->workshop_organisation_limit - $this->workshop_organisation_myNb;
         $orga_hackatons_left = $this->hackaton_organisation_limit - $this->hackaton_organisation_myNb;
+
         printf("For the year %s with all Talks, Workshops, Hackatons:\n", $this->year);
         printf("You won %d xps\n", $this->nb_xps_won);
         printf("You lost %d xps\n\n", $this->nb_xps_lost);
@@ -293,7 +309,69 @@ class Xpscounter
         if ($this->hackaton_organisation_limit != 9999 && $orga_hackatons_left > 0)
             printf("You can still organize %d Hackatons before reaching the limite\n", $orga_hackatons_left);
 
-        printf("\n\nYour number of xp points is: %d\n\n", $this->xps);
+        printf("\nYour number of xp points is: %d\n\n", $this->xps);
+    }
+
+    public function printAll()
+    {
+        $parti_talks_left = $this->talk_participation_limit - $this->talk_participation_myNb;
+        $parti_workshops_left = $this->workshop_participation_limit - $this->workshop_participation_myNb;
+        $parti_hackatons_left = $this->hackaton_participation_limit - $this->hackaton_participation_myNb;
+        $orga_talks_left = $this->talk_organisation_limit - $this->talk_organisation_myNb;
+        $orga_workshops_left = $this->workshop_organisation_limit - $this->workshop_organisation_myNb;
+        $orga_hackatons_left = $this->hackaton_organisation_limit - $this->hackaton_organisation_myNb;
+
+        if (count($this->participation_attended) > 0) {
+            printf("You were present in participation to:\n");
+            foreach ($this->participation_attended as $tmp) {
+                printf("%s\n", $tmp);
+            }
+            printf("\n");
+        }
+
+        if (count($this->participation_missing) > 0) {
+            printf("You were missing in participation to:\n");
+            foreach ($this->participation_missing as $tmp) {
+                printf("%s\n", $tmp);
+            }
+            printf("\n");
+        }
+
+        if (count($this->organization_attended) > 0) {
+            printf("You were present in organization to:\n");
+            foreach ($this->organization_attended as $tmp) {
+                printf("%s\n", $tmp);
+            }
+            printf("\n");
+        }
+
+        if (count($this->organization_missing) > 0) {
+            printf("You were missing in organization to:\n");
+            foreach ($this->organization_missing as $tmp) {
+                printf("%s\n", $tmp);
+            }
+            printf("\n");
+        }
+
+        printf("For the year %s with all Talks, Workshops, Hackatons:\n", $this->year);
+        printf("You won %d xps\n", $this->nb_xps_won);
+        printf("You lost %d xps\n\n", $this->nb_xps_lost);
+
+        if ($parti_talks_left > 0)
+            printf("You can still participate to %d Talks before reaching the limite\n", $parti_talks_left);
+        if ($parti_workshops_left > 0)
+            printf("You can still participate to %d Workshop before reaching the limite\n", $parti_workshops_left);
+        if ($this->hackaton_participation_limit != 9999 && $parti_hackatons_left > 0)
+            printf("You can still participate to %d Hackatons before reaching the limite\n", $parti_hackatons_left);
+
+        if ($orga_talks_left > 0)
+            printf("You can still organize %d Talks before reaching the limite\n", $orga_talks_left);
+        if ($orga_workshops_left > 0)
+            printf("You can still organize %d Workshop before reaching the limite\n", $orga_workshops_left);
+        if ($this->hackaton_organisation_limit != 9999 && $orga_hackatons_left > 0)
+            printf("You can still organize %d Hackatons before reaching the limite\n", $orga_hackatons_left);
+
+        printf("\nYour number of xp points is: %d\n\n", $this->xps);
     }
 }
 
