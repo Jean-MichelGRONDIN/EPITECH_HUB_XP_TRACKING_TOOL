@@ -205,7 +205,7 @@ class Xpscounter
         $orga = $event['assistants'];
         foreach ($orga as $people) {
             if ($people['login'] == $this->user_login) {
-                if ($people['manager_status'] == "present") {
+                if ($people['manager_status'] == "present" || $people['manager_status'] == "accept") {
                     $presence_status = 2;
                 } else if ($people['manager_status'] == "absent") {
                     $presence_status = -2;
